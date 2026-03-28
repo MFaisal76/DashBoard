@@ -1,140 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>USDT Selector</title>
-  <style>
-    body {
-      background: #000;
-      color: #39ff14;
-      font-family: monospace;
-      text-align: center;
-      padding: 30px;
-    }
+<script>
+  async function loadPrice() {
+    const currency = document.getElementById("currency").value;
+    const priceEl = document.getElementById("price");
+    const changeEl = document.getElementById("change");
+    const updatedEl = document.getElementById("updated");
 
-    h1 {
-      font-size: 42px;
-      margin-top: 40px;
-      text-shadow: 0 0 12px #39ff14;
-    }
+    priceEl.textContent = "Loading...";
+    changeEl.textContent = "";
+    updatedEl.textContent = "";
 
-    .card {
-      max-width: 650px;
-      margin: 40px auto;
-      padding: 30px;
-      border: 3px solid #7cff7c;
-      border-radius: 24px;
-      box-shadow: 0 0 30px #00ff66;
-      background: rgba(0, 255, 100, 0.08);
-    }
+    try {
+      if (currency === "USD") {
+        priceEl.textContent = "1.00 USD";
+        changeEl.textContent = "1 USDT ≈ 1 USD";
+        changeEl.style.color = "#39ff14";
+        updatedEl.textContent = "Updated: " + new Date().toLocaleString();
+        return;
+      }
 
-    .label {
-      font-size: 22px;
-      margin-bottom: 18px;
-    }
+      const url = "https://api.frankfurter.dev/v1/latest?base=USD&symbols=" + currency;
+      const res = await fetch(url, { cache: "no-store" });
+      const data = await res.json();
 
-    .price {
-      font-size: 58px;
-      font-weight: bold;
-      margin: 20px 0;
-      text-shadow: 0 0 15px #39ff14;
-    }
+      if (!data.rates || typeof data.rates[currency] !== "number") {
+        throw new Error("Invalid data");
+      }
 
-    .change {
-      font-size: 22px;
-      margin-top: 10px;
-    }
+      const rate = data.rates[currency];
 
-    .updated {
-      margin-top: 18px;
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    select, button {
-      margin-top: 18px;
-      padding: 12px 18px;
-      font-size: 20px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    select {
-      background: #39ff14;
-      color: #111;
-      font-weight: bold;
-      margin-right: 10px;
-    }
-
-    button {
-      background: #fff;
-      color: #111;
-      font-weight: bold;
-    }
-
-    .note {
-      font-size: 14px;
-      margin-top: 16px;
-      color: #b8ffb8;
-    }
-  </style>
-</head>
-<body>
-  <h1>🪙 USDT Smart Selector</h1>
-
-  <div class="card">
-    <div class="label">Choose currency</div>
-
-    <select id="currency" onchange="loadPrice()">
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
-      <option value="EGP" selected>EGP</option>
-    </select>
-
-    <button onclick="loadPrice()">Refresh</button>
-
-    <div id="price" class="price">Loading...</div>
-    <div id="change" class="change"></div>
-    <div id="updated" class="updated"></div>
-    <div class="note">Shows 1 USDT ≈ selected currency</div>
-  </div>
-
-  <script>
-    async function loadPrice() {
-      const currency = document.getElementById("currency").value;
-      const priceEl = document.getElementById("price");
-      const changeEl = document.getElementById("change");
-      const updatedEl = document.getElementById("updated");
-
-      priceEl.textContent = "Loading...";
+      priceEl.textContent = rate.toFixed(2) + " " + currency;
+      changeEl.textContent = "1 USDT ≈ " + rate.toFixed(2) + " " + currency;
+      changeEl.style.color = "#39ff14";
+      updatedEl.textContent = "Rate date: " + data.date;
+    } catch (e) {
+      priceEl.textContent = "Failed to load price";
       changeEl.textContent = "";
       updatedEl.textContent = "";
+      console.error(e);
+    }
+  }
 
-      try {
-        if (currency === "USD") {
-          priceEl.textContent = "1.00 USD";
-          changeEl.textContent = "1 USDT ≈ 1 USD";
-          changeEl.style.color = "#39ff14";
-          updatedEl.textContent = "Updated: " + new Date().toLocaleString();
-          return;
-        }
-
-        const res = await fetch("https://api.frankfurter.dev/v2/rates?base=USD&quotes=" + currency);
-        const data = await res.json();
-
-        if (!Array.isArray(data) || !data[0] || typeof data[0].rate !== "number") {
-          throw new Error("Invalid data");
-        }
-
-        const rate = data[0].rate;
-        const date = data[0].date;
-
-        priceEl.textContent = rate.toFixed(2) + " " + currency;
-        changeEl.textContent = "1 USDT ≈ " + rate.toFixed(2) + " " + currency;
-        changeEl.style.color = "#39ff14";
-        updatedEl.textContent = "Rate date: " + date;
-      } catch (e) {
-        priceEl.textContent = "Failed to load price";
-        changeEl
+  loadPrice();
+</script>
