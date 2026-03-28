@@ -1,0 +1,11 @@
+{
+  "name": "usdt-egp-dashboard-v2-netlify",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.8.8"
+  }
+}
