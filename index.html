@@ -12,11 +12,6 @@
       padding: 20px;
       text-align: center;
     }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
     .card {
       border: 1px solid lime;
       border-radius: 14px;
@@ -25,23 +20,19 @@
       margin: 20px auto;
       box-shadow: 0 0 20px rgba(0,255,0,0.2);
     }
-
     .price {
       font-size: 38px;
       font-weight: bold;
       margin: 12px 0;
     }
-
     .change {
       font-size: 20px;
       margin-bottom: 10px;
     }
-
     .updated {
       font-size: 14px;
       color: #9cff9c;
     }
-
     button {
       background: lime;
       color: black;
@@ -76,26 +67,18 @@
       updatedEl.textContent = "";
 
       try {
-        const res = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp&include_24hr_change=true"
-        );
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp&include_24hr_change=true");
         const data = await res.json();
 
         const price = data.tether.egp;
         const change = data.tether.egp_24h_change;
 
         priceEl.textContent = price.toFixed(2) + " EGP";
-
-        if (typeof change === "number") {
-          changeEl.textContent = "24h Change: " + change.toFixed(2) + "%";
-          changeEl.style.color = change >= 0 ? "lime" : "red";
-        }
-
+        changeEl.textContent = "24h Change: " + change.toFixed(2) + "%";
+        changeEl.style.color = change >= 0 ? "lime" : "red";
         updatedEl.textContent = "Updated: " + new Date().toLocaleString();
-      } catch (err) {
+      } catch (e) {
         priceEl.textContent = "Failed to load price";
-        changeEl.textContent = "";
-        updatedEl.textContent = "";
       }
     }
 
