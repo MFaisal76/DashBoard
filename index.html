@@ -1,119 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>USDT EGP</title>
-  <style>
-    body {
-      background: #000;
-      color: #39ff14;
-      font-family: monospace;
-      text-align: center;
-      padding: 30px;
-    }
+<script>
+  async function loadPrice() {
+    const priceEl = document.getElementById("price");
+    const changeEl = document.getElementById("change");
+    const updatedEl = document.getElementById("updated");
 
-    h1 {
-      font-size: 42px;
-      margin-top: 40px;
-      text-shadow: 0 0 12px #39ff14;
-    }
+    priceEl.textContent = "Loading...";
+    changeEl.textContent = "";
+    updatedEl.textContent = "";
 
-    .card {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 30px;
-      border: 3px solid #7cff7c;
-      border-radius: 24px;
-      box-shadow: 0 0 30px #00ff66;
-      background: rgba(0, 255, 100, 0.08);
-    }
+    try {
+      const res = await fetch("https://api.frankfurter.dev/v2/rates?base=USD&quotes=EGP");
+      const data = await res.json();
 
-    .label {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
+      if (!Array.isArray(data) || !data[0] || typeof data[0].rate !== "number") {
+        throw new Error("Invalid data");
+      }
 
-    .price {
-      font-size: 64px;
-      font-weight: bold;
-      margin: 20px 0;
-      text-shadow: 0 0 15px #39ff14;
-    }
+      const rate = data[0].rate;
+      const date = data[0].date;
 
-    .change {
-      font-size: 26px;
-      margin-top: 10px;
-    }
-
-    .updated {
-      margin-top: 18px;
-      font-size: 18px;
-      opacity: 0.9;
-    }
-
-    button {
-      margin-top: 24px;
-      padding: 14px 28px;
-      font-size: 22px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      background: #fff;
-      color: #111;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h1>🪙 USDT/EGP Smart Selector</h1>
-
-  <div class="card">
-    <div class="label">Live USDT Price in EGP</div>
-    <div id="price" class="price">Loading...</div>
-    <div id="change" class="change"></div>
-    <div id="updated" class="updated"></div>
-    <button onclick="loadPrice()">Refresh</button>
-  </div>
-
-  <script>
-    async function loadPrice() {
-      const priceEl = document.getElementById("price");
-      const changeEl = document.getElementById("change");
-      const updatedEl = document.getElementById("updated");
-
-      priceEl.textContent = "Loading...";
+      priceEl.textContent = rate.toFixed(2) + " EGP";
+      changeEl.textContent = "Reference: USD/EGP";
+      changeEl.style.color = "#39ff14";
+      updatedEl.textContent = "Rate date: " + date;
+    } catch (e) {
+      priceEl.textContent = "Failed to load price";
       changeEl.textContent = "";
       updatedEl.textContent = "";
-
-      try {
-        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp&include_24hr_change=true");
-        const data = await res.json();
-
-        if (!data.tether || typeof data.tether.egp !== "number") {
-          throw new Error("Invalid data");
-        }
-
-        const price = data.tether.egp;
-        const change = data.tether.egp_24h_change;
-
-        priceEl.textContent = price.toFixed(2) + " EGP";
-
-        if (typeof change === "number") {
-          changeEl.textContent = "24h Change: " + change.toFixed(2) + "%";
-          changeEl.style.color = change >= 0 ? "#39ff14" : "#ff4d4d";
-        }
-
-        updatedEl.textContent = "Updated: " + new Date().toLocaleString();
-      } catch (e) {
-        priceEl.textContent = "Failed to load price";
-        changeEl.textContent = "";
-        updatedEl.textContent = "";
-      }
     }
+  }
 
-    loadPrice();
-    setInterval(loadPrice, 10000);
-  </script>
-</body>
-</html>
+  loadPrice();
+  setInterval(loadPrice, 60000);
+</script>
